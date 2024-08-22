@@ -3,6 +3,9 @@ import { api } from '@/api';
 import { useModal } from '@/composables/useModal';
 import { useToast } from '@/composables/useToast';
 import { ref } from 'vue';
+import { defineEmits } from 'vue';
+
+const emit = defineEmits(['applicationSubmitted']);
 const modal = useModal<boolean>()
 const toast = useToast()
 
@@ -27,7 +30,10 @@ const formData = ref({
 
 const submitApplication = async () => {
   const response = await api.applications.post(formData.value)
-  if (response.success) toast.success('Application Saved Successfully.')
+  if (response.success) {
+    toast.success('Application Saved Successfully.')
+    emit('applicationSubmitted');
+  }
   else {
     toast.error('Error occurred while saving application')
     formData.value.applicantName = '';
@@ -104,10 +110,10 @@ const submitApplication = async () => {
         <BNumberInput v-model="formData.outgoingValuation" id="outgoing_valuation" required />
         <label for="savings_contribution">Savings Contribution</label>
         <BNumberInput v-model="formData.savingsContribution" id="savings_contribution" required />
+        <BButton type="submit" variant="primary" label="Submit"></BButton>
       </form>
 
       <template #footer>
-        <BButton type="submit" variant="primary" label="Submit"></BButton>
         <BButton label="Cancel" @click="modal.confirm(false)"></BButton>
       </template>
     </BModal>

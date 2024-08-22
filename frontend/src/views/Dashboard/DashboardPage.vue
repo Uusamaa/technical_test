@@ -34,6 +34,10 @@ const loadTasks = async () => {
 
 loadApplications();
 loadTasks();
+
+const handleApplicationSubmitted = () => {
+  loadApplications();
+};
 </script>
 
 <template>
@@ -42,7 +46,7 @@ loadTasks();
       <ApplicationsCard :applications="applications" />
     </div>
     <div class="dashboard__actions">
-      <ActionsCard />
+      <ActionsCard @applicationSubmitted="handleApplicationSubmitted" />
     </div>
     <div class="dashboard__tasks">
       <TasksCard :tasks="tasks" />

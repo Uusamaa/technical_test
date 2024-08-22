@@ -9,7 +9,6 @@ import {
 } from '@nestjs/swagger';
 import { Application } from 'src/models/applications/application.entity';
 import {
-  ApplicationDto,
   BrokerApplicationPostResponseDto,
   BrokerApplicationsListBadRequestResponseDto,
   BrokerApplicationsListRequestDto,
@@ -17,7 +16,7 @@ import {
 } from './list-applications.dto';
 import { BrokerDto } from 'src/models/brokers/broker.dto';
 import { BrokerGuard } from '../../broker.guard';
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { INTERNAL_SERVER_ERROR } from 'src/common/constants/response-messages';
 import { InternalServerErrorResponseDto } from 'src/common/responses';
 import { Task } from 'src/models/tasks/task.entity';
@@ -27,6 +26,7 @@ import { formatResponseTable } from 'src/common/swagger';
 import User from 'src/common/decorators/user';
 import { Op } from 'sequelize';
 import { ApplicationStatus } from 'src/enums/application-status.enum';
+import { Request } from 'express';
 
 /**
  * Broker API endpoint for listing applications they have submitted with optional result filtering.
@@ -138,11 +138,13 @@ export class BrokerApplicationsListController {
   })
   async post(
     @User() user: BrokerDto,
-    @Body() body: ApplicationDto
+    @Req() req: Request
   ): Promise<BrokerApplicationPostResponseDto> {
+    const body = req.body;
     const avgLoanAmount = await this.applicationEntity.getAverageLoanAmount()
     const loanAmount = body.loanAmount !== avgLoanAmount ? body.loanAmount : null;
-    // const application = await this.applicationEntity.create({ ...body, status: ApplicationStatus.Submitted, brokerId: user.id });
+
+    await this.applicationEntity.create({ ...body, status: ApplicationStatus.Submitted, brokerId: user.id });
     return {
       success: true,
       loanAmount
